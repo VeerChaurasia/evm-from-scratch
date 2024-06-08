@@ -84,7 +84,7 @@
   {
     "name": "PUSH10",
     "hint": "SIZE = OPCODE - PUSH1 + 1, then transform take the next SIZE bytes, PC += SIZE",
-    "code": {
+     "code": {
       "asm": "PUSH10 0x112233445566778899aa",
       "bin": "69112233445566778899aa"
     },
