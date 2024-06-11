@@ -80,6 +80,7 @@ import (
 	// "fmt"
 	"math/big"
 
+	// "golang.org/x/text/cases"
 )
 const UINT256MAX = 0xFFFFFFFFFFFFFFFF
 
@@ -314,6 +315,92 @@ func handleGT(stack []*big.Int)([]*big.Int,bool){
 	}
 	return stack, true
 }
+func handleSLT(stack []*big.Int)([]*big.Int,bool){
+	if len(stack) < 2 {
+		return nil, false
+	}
+	value1:=stack[0].Int64()
+	int8Value1:=int8(value1)
+	value2:=stack[1].Int64()
+	int8Value2:=int8(value2)
+	if int8Value1 < int8Value2{
+		stack =stack[2:]
+		stack=append(stack,big.NewInt(1))
+
+	}else{
+		stack=stack[2:]
+		stack = append(stack, big.NewInt(0))
+
+	}
+	return stack, true
+}
+func handleGLT(stack []*big.Int)([]*big.Int,bool){
+	if len(stack) < 2 {
+		return nil, false
+	}
+	value1:=stack[0].Int64()
+	int8Value1:=int8(value1)
+	value2:=stack[1].Int64()
+	int8Value2:=int8(value2)
+	if int8Value1 > int8Value2{
+		stack =stack[2:]
+		stack=append(stack,big.NewInt(1))
+
+	}else{
+		stack=stack[2:]
+		stack = append(stack, big.NewInt(0))
+
+	}
+	return stack, true
+}
+func handleEQ(stack []*big.Int)([]*big.Int,bool){
+	if len(stack) < 2 {
+		return nil, false
+	}
+	if stack[0].Cmp(stack[1])==0{
+		stack=stack[2:]
+		stack =append(stack,big.NewInt(1))
+	}else{
+		stack=stack[2:]
+		stack=append(stack, big.NewInt(0))
+	}
+	return stack, true
+}
+func handleISZERO(stack []*big.Int)([]*big.Int,bool){
+	// if len(stack)<1{
+	// 	return nil, false
+	// }
+	if stack[0].Cmp(big.NewInt(0))==0{
+		stack=stack[1:]
+		stack=append(stack, big.NewInt(1))
+	}else{
+		stack=stack[1:]
+		stack=append(stack, big.NewInt(0))
+	
+	}
+	return stack,true
+}
+func handleNot(stack []*big.Int) ([]*big.Int, bool) {
+	if len(stack) < 1 {
+		return nil, false
+	}
+
+	
+	value := stack[0]
+	stack = stack[1:]
+
+	// Create a bitmask with all bits set to 1 for 256 bits
+	bitmask := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(1))
+
+	
+	value1:=new(big.Int).Xor(value, bitmask)
+
+	
+	stack = append(stack ,value1)
+
+	return stack, true
+}
+
 // Evm runs the EVM code and returns the stack and a success indicator.
 func Evm(code []byte) ([]*big.Int, bool) {
     var stack []*big.Int
@@ -461,8 +548,17 @@ func Evm(code []byte) ([]*big.Int, bool) {
 				return handleLT(stack)
 			case 0x11:
 				return handleGT(stack)
+			case 0x12:
+				return handleSLT(stack)
+			case 0x13:
+				return handleGLT(stack)
+			case 0x14:
+				return handleEQ(stack)
 
-
+			case 0x15:
+				return handleISZERO(stack)
+			case 0x19:
+				return handleNot(stack)
 
 				
             default:
